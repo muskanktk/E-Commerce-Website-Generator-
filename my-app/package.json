@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://muskanktk.github.io/E-Commerce-Website-Generator-/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
