@@ -1,2 +1,5 @@
-
+/* src/index.css */
 @import "tailwindcss";
+
+/* (optional) your global tweaks here */
+html, body, #root { height: 100%; }
