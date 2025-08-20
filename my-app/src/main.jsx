@@ -1,4 +1,4 @@
-import "./index.css";              // <-- add this line
+import "./index.css";                // <-- must be the first import
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { HashRouter } from "react-router-dom";
