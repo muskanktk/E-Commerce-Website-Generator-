@@ -1,9 +1,8 @@
-
-import { defineConfig } from 'vite'
-
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: '/E-Commerce-Website-Generator-/', // must match the repo name exactly
-  plugins: [react()] // remove this line if not using React
-})
+  plugins: [react()],
+  // must match your repo name exactly:
+  base: "/E-Commerce-Website-Generator-/",
+});
