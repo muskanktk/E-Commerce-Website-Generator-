@@ -1,32 +1,25 @@
-// App.jsx
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import { FaHeart, FaShoppingCart, FaUser, FaTrash, FaEdit, FaPlus, FaCog } from "react-icons/fa";
 
-// Lazy routes (About & Contact exist as separate files)
 const About = lazy(() => import("./About"));
 const Contact = lazy(() => import("./Contact"));
 
-/** OWNER EMAIL — change to your email (controls admin + settings access) */
 const OWNER_EMAIL = "muskanktk001@gmail.com";
-
-/** Money helper — expects cents (e.g., 1500 -> $15.00) */
 const money = (cents = 0) => `$${(Number(cents || 0) / 100).toFixed(2)}`;
 
-/** ================= DEFAULT BRANDING (no-code controls) ================= */
 const DEFAULT_BRANDING = {
   siteTitle: "AROOJ",
   heroHeadline: "SEASONAL MOMENTS",
   heroButtonLabel: "SHOP HERE",
-  primaryColor: "#ec4899", // pink-600
-  accentColor: "#16a34a",  // green-600
-  textColor: "#111827",    // gray-900
-  fontFamily: "Inter",     // Google Fonts name
+  primaryColor: "#ec4899",
+  accentColor: "#16a34a",
+  textColor: "#111827",
+  fontFamily: "Inter",
   heroImages: [
     "https://i.pinimg.com/1200x/d3/3a/52/d33a5269faf18834849f12dd9815b650.jpg",
     "https://i.pinimg.com/736x/46/7b/a8/467ba80b3e5c0766bcdd9b629875eb97.jpg",
   ],
-  // Showcase controls (editable in Settings)
   showcaseTitle: "Showcase Your Style",
   showcaseBody:
     "Highlight real people wearing your jewelry, share customer photos, or show lifestyle images.",
@@ -34,7 +27,7 @@ const DEFAULT_BRANDING = {
     "https://editorialist.com/thumbnail/wp-content/uploads/2025/07/Editorialist25_Bvlgari_Wedding-Guest-hero.webp?width=825&quality=60",
 };
 
-/* =================== AUTH MODAL =================== */
+/* ---------------- AUTH ---------------- */
 function AuthoModal({ open, onClose }) {
   const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -107,7 +100,7 @@ function AuthoModal({ open, onClose }) {
   );
 }
 
-/* ============ ADMIN ADD/EDIT PRODUCT MODAL ============ */
+/* -------------- ADMIN PRODUCT MODAL -------------- */
 function AdminProductModal({ open, initial, onClose, onSave }) {
   const [form, setForm] = useState(
     initial || { title: "", price: "", image: "", stock: 1, badge: "", popularity: 0 }
@@ -123,7 +116,6 @@ function AdminProductModal({ open, initial, onClose, onSave }) {
         stock: initial.stock ?? 1,
         badge: initial.badge || "",
         popularity: initial.popularity ?? 0,
-        // show dollars in input for editing
         price: initial.price_cents != null ? (initial.price_cents / 100).toFixed(2) : (initial.price ?? ""),
       });
     } else {
@@ -169,9 +161,9 @@ function AdminProductModal({ open, initial, onClose, onSave }) {
   );
 }
 
-/* =================== SITE SETTINGS (no-code) =================== */
+/* -------------- SETTINGS MODAL -------------- */
 function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) {
-  const [tab, setTab] = useState("brand"); // brand | content | images
+  const [tab, setTab] = useState("brand");
   const [local, setLocal] = useState(branding);
 
   useEffect(() => { if (open) setLocal(branding); }, [open, branding]);
@@ -188,12 +180,11 @@ function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) 
           <button onClick={onClose} className="rounded-lg border px-3 py-1 hover:bg-black/5">Close</button>
         </div>
 
-        {/* Tabs */}
         <div className="mt-3 flex gap-2">
           {["brand", "content", "images"].map((t) => (
             <button
               key={t}
-              className={`rounded-lg border px-3 py-1 ${tab === t ? "bg-[var(--brand)] text-white" : "hover:bg:black/5 hover:bg-black/5"}`}
+              className={`rounded-lg border px-3 py-1 ${tab === t ? "bg-[var(--brand)] text-white" : "hover:bg-black/5"}`}
               onClick={() => setTab(t)}
             >
               {t[0].toUpperCase() + t.slice(1)}
@@ -201,7 +192,6 @@ function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) 
           ))}
         </div>
 
-        {/* Panels */}
         <div className="mt-4 space-y-3">
           {tab === "brand" && (
             <>
@@ -246,7 +236,6 @@ function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) 
                 <input name="heroButtonLabel" value={local.heroButtonLabel} onChange={handle} className="block w-full border rounded px-3 py-2" />
               </label>
 
-              {/* Showcase (text) */}
               <label className="block sm:col-span-2">
                 <span className="text-sm">Showcase title</span>
                 <input
@@ -290,7 +279,6 @@ function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) 
                 />
               </label>
 
-              {/* Showcase image */}
               <label className="block">
                 <span className="text-sm">Showcase image URL</span>
                 <input
@@ -323,7 +311,7 @@ function SettingsModal({ open, onClose, branding, setBranding, resetBranding }) 
   );
 }
 
-/* =================== HOME (FEATURED) =================== */
+/* -------------- HOME SECTION -------------- */
 function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProduct, setAdminOpen, deleteProduct, branding }) {
   const topFour = useMemo(
     () => [...products].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 4),
@@ -332,7 +320,6 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
 
   return (
     <>
-      {/* Banner */}
       <section className="relative w-screen">
         <div className="flex">
           <img
@@ -366,7 +353,6 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
         </div>
       </section>
 
-      {/* Featured list */}
       <section className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
         <h2 className="mt-6 text-3xl font-extrabold tracking-wide text-center font-serif">
           HANDMADE POPULAR FEATURES
@@ -397,7 +383,7 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
                 title="Add to wishlist"
                 aria-label="Add to wishlist"
               >
-                <FaHeart size={18} className="text-gray-500 hover:text-red-500" />
+                <FaHeart size={18} />
               </button>
 
               <button
@@ -408,7 +394,7 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
                 title={p.stock <= 0 ? "Out of stock" : "Add to cart"}
                 aria-label={p.stock <= 0 ? "Out of stock" : "Add to cart"}
               >
-                <FaShoppingCart size={18} className="text-gray-500 hover:text-[var(--accent)]" />
+                <FaShoppingCart size={18} />
               </button>
 
               {IS_OWNER && (
@@ -427,17 +413,14 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
           ))}
         </div>
 
-        {/* Showcase section */}
+        {/* Showcase */}
         <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Left: text */}
           <div>
             <h3 className="text-2xl font-bold mb-3">{branding.showcaseTitle || "Showcase Your Style"}</h3>
             <p className="text-gray-700">
               {branding.showcaseBody || "Highlight real people wearing your jewelry, share customer photos, or show lifestyle images."}
             </p>
           </div>
-
-          {/* Right: image */}
           <div>
             <img
               src={branding.showcaseImage || "https://editorialist.com/thumbnail/wp-content/uploads/2025/07/Editorialist25_Bvlgari_Wedding-Guest-hero.webp?width=825&quality=60"}
@@ -455,7 +438,7 @@ function HomeSection({ products, addToCart, addToWishlist, IS_OWNER, setEditProd
   );
 }
 
-/* =================== EARRINGS PAGE (ALL) =================== */
+/* -------------- EARRINGS PAGE -------------- */
 function EarringsPage({ products, addToCart, addToWishlist, IS_OWNER, setEditProduct, setAdminOpen, deleteProduct }) {
   return (
     <main className="pt-20 mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
@@ -486,7 +469,7 @@ function EarringsPage({ products, addToCart, addToWishlist, IS_OWNER, setEditPro
               title="Add to wishlist"
               aria-label="Add to wishlist"
             >
-              <FaHeart size={18} className="text-gray-500 hover:text-red-500" />
+              <FaHeart size={18} />
             </button>
 
             <button
@@ -497,7 +480,7 @@ function EarringsPage({ products, addToCart, addToWishlist, IS_OWNER, setEditPro
               title={p.stock <= 0 ? "Out of stock" : "Add to cart"}
               aria-label={p.stock <= 0 ? "Out of stock" : "Add to cart"}
             >
-              <FaShoppingCart size={18} className="text-gray-500 hover:text-[var(--accent)]" />
+              <FaShoppingCart size={18} />
             </button>
 
             {IS_OWNER && (
@@ -519,7 +502,7 @@ function EarringsPage({ products, addToCart, addToWishlist, IS_OWNER, setEditPro
   );
 }
 
-// ⬇️ Modal for editing About / Contact sections
+/* -------------- ABOUT/CONTACT EDIT MODAL -------------- */
 function EditSectionModal({ open, type, initial, onClose, onSave }) {
   const [form, setForm] = useState(initial || {});
   useEffect(() => { if (open) setForm(initial || {}); }, [open, initial]);
@@ -589,7 +572,7 @@ function EditSectionModal({ open, type, initial, onClose, onSave }) {
         )}
 
         <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onClose} className="rounded-lg border px-4 py-2 hover:bg:black/5 hover:bg-black/5">Cancel</button>
+          <button onClick={onClose} className="rounded-lg border px-4 py-2 hover:bg-black/5">Cancel</button>
           <button onClick={save} className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Save</button>
         </div>
       </div>
@@ -597,12 +580,12 @@ function EditSectionModal({ open, type, initial, onClose, onSave }) {
   );
 }
 
-/* ============== OWNER-ONLY ROUTE WRAPPER ============== */
+/* -------------- PRIVATE ROUTE -------------- */
 function PrivateRoute({ isAllowed, children }) {
   return isAllowed ? children : <Navigate to="/" replace />;
 }
 
-/* =================== REPORTS PAGE (OWNER ONLY) =================== */
+/* -------------- REPORTS -------------- */
 function ReportsPage({ orders, events, products }) {
   const totalRevenue = useMemo(
     () => orders.reduce((s, o) => s + (o.subtotal_cents || 0), 0),
@@ -630,7 +613,6 @@ function ReportsPage({ orders, events, products }) {
     return arr.sort((a, b) => b.qty - a.qty).slice(0, 5);
   }, [qtyByProduct, products]);
 
-  // Simple rule-based “AI” insights (client-only)
   const insights = useMemo(() => {
     const lines = [];
     if (totalOrders === 0) {
@@ -646,12 +628,8 @@ function ReportsPage({ orders, events, products }) {
       const wishlistAdds = last7.filter(e => e.type === "wishlist_add").length;
       const ATCs = last7.filter(e => e.type === "add_to_cart").length;
       const checkouts = last7.filter(e => e.type === "checkout").length;
-      if (wishlistAdds > ATCs) {
-        lines.push("More wishlists than add-to-carts this week — consider a small discount banner or free shipping threshold.");
-      }
-      if (ATCs > 0 && checkouts === 0) {
-        lines.push("People add to cart but don’t check out — try surfacing trust badges or a clearer returns policy.");
-      }
+      if (wishlistAdds > ATCs) lines.push("More wishlists than add-to-carts this week — consider a small discount banner.");
+      if (ATCs > 0 && checkouts === 0) lines.push("People add to cart but don’t check out — show trust badges / return policy.");
     }
     return lines;
   }, [totalOrders, totalRevenue, topProducts, events]);
@@ -706,16 +684,15 @@ function ReportsPage({ orders, events, products }) {
           {insights.map((line, i) => <li key={i}>{line}</li>)}
         </ul>
         <p className="mt-3 text-xs text-gray-500">
-          (Demo: rule-based insights in the browser. For real LLM insights, call a secure serverless API that verifies owner auth.)
+          (Demo: rule-based insights in the browser.)
         </p>
       </section>
     </main>
   );
 }
 
-/* =================== APP (ROUTER + SHARED STATE) =================== */
+/* -------------- APP ROOT -------------- */
 export default function App() {
-  // state
   const [open, setOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -723,13 +700,11 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  // ===== Editable page content (persisted) =====
   const DEFAULT_ABOUT = {
     title: "About Us",
     body: "Write about your brand, story, materials, and care instructions.",
     image: "https://via.placeholder.com/1200x500?text=About+Banner",
   };
-
   const DEFAULT_CONTACT = {
     title: "Contact Us",
     email: "example@email.com",
@@ -746,25 +721,19 @@ export default function App() {
     try { return { ...DEFAULT_CONTACT, ...(JSON.parse(localStorage.getItem("contactData") || "{}")) }; }
     catch { return DEFAULT_CONTACT; }
   });
-
   useEffect(() => { localStorage.setItem("aboutData", JSON.stringify(aboutData)); }, [aboutData]);
   useEffect(() => { localStorage.setItem("contactData", JSON.stringify(contactData)); }, [contactData]);
 
-  // for EditSectionModal wiring
-  const [editSection, setEditSection] = useState(null); // "about" | "contact" | null
+  const [editSection, setEditSection] = useState(null);
 
-  // session
   const sessionEmail =
     typeof window !== "undefined" ? JSON.parse(localStorage.getItem("session") || "null")?.email : null;
   const IS_OWNER = sessionEmail === OWNER_EMAIL;
 
-  // branding (persisted)
   const [branding, setBranding] = useState(() => {
     try { return { ...DEFAULT_BRANDING, ...(JSON.parse(localStorage.getItem("branding") || "{}")) }; }
     catch { return DEFAULT_BRANDING; }
   });
-
-  // inject Google Font + persist + expose CSS vars
   useEffect(() => {
     localStorage.setItem("branding", JSON.stringify(branding));
     const id = "dynamic-google-font";
@@ -775,14 +744,11 @@ export default function App() {
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
-    // FIX: correct Google Fonts family encoding
     const fam = (branding.fontFamily || "Inter").trim().replace(/\s+/g, "+");
     link.href = `https://fonts.googleapis.com/css2?family=${fam}:wght@400;600;700&display=swap`;
   }, [branding]);
-
   const resetBranding = () => setBranding(DEFAULT_BRANDING);
 
-  // products (persisted) + migrate old dollar prices -> cents
   const [products, setProducts] = useState(() => {
     try {
       const raw = JSON.parse(localStorage.getItem("products") || "[]");
@@ -799,8 +765,6 @@ export default function App() {
       return [];
     }
   });
-
-  // seed default products if empty (use integer cents)
   useEffect(() => {
     if (products.length === 0) {
       const seed = [
@@ -818,10 +782,8 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   useEffect(() => { localStorage.setItem("products", JSON.stringify(products)); }, [products]);
 
-  // admin ops
   const handleSaveProduct = (prod) => {
     setProducts((prev) => {
       const idx = prev.findIndex((p) => p.id === prod.id);
@@ -830,13 +792,11 @@ export default function App() {
     });
     setAdminOpen(false); setEditProduct(null);
   };
-
   const deleteProduct = (id) => {
     if (!confirm("Delete this product?")) return;
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  // cart
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem("cart") || "[]"); }
     catch { return []; }
@@ -890,7 +850,6 @@ export default function App() {
   };
   const subtotal = useMemo(() => cart.reduce((s, i) => s + (i.price_cents || 0) * (i.qty || 0), 0), [cart]);
 
-  // ============ WISHLIST ============
   const [wishlist, setWishlist] = useState(() => {
     try { return JSON.parse(localStorage.getItem("wishlist") || "[]"); }
     catch { return []; }
@@ -902,18 +861,16 @@ export default function App() {
 
   const addToWishlist = (product) => {
     setWishlist((prev) => {
-      if (prev.find((x) => x.id === product.id)) return prev; // avoid duplicates
+      if (prev.find((x) => x.id === product.id)) return prev;
       return [...prev, product];
     });
     logEvent({ type: "wishlist_add", productId: product.id });
     setWishlistOpen(true);
   };
-
   const removeFromWishlist = (id) => {
     setWishlist((prev) => prev.filter((i) => i.id !== id));
   };
 
-  // ============ ANALYTICS: ORDERS + EVENTS ============
   const [orders, setOrders] = useState(() => {
     try { return JSON.parse(localStorage.getItem("orders") || "[]"); }
     catch { return []; }
@@ -926,9 +883,7 @@ export default function App() {
   });
   useEffect(() => { localStorage.setItem("events", JSON.stringify(events)); }, [events]);
 
-  const logEvent = (evt) => {
-    setEvents((prev) => [...prev, { ts: Date.now(), ...evt }]);
-  };
+  const logEvent = (evt) => setEvents((prev) => [...prev, { ts: Date.now(), ...evt }]);
 
   const checkout = () => {
     if (cart.length === 0) return;
@@ -940,367 +895,319 @@ export default function App() {
     };
     setOrders((prev) => [order, ...prev]);
     logEvent({ type: "checkout", orderId: order.id, total_cents: order.subtotal_cents, items: order.items.length });
-    setCart([]); // stock already reduced during addToCart
+    setCart([]);
     setCartOpen(false);
     alert("Order placed! (demo)");
   };
 
-  // ===== Search filtering for /earrings =====
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return products;
     return products.filter(p =>
-      [p.title, p.badge]
-        .filter(Boolean)
-        .some(s => s.toLowerCase().includes(q))
+      [p.title, p.badge].filter(Boolean).some(s => s.toLowerCase().includes(q))
     );
   }, [products, query]);
 
-  // Determine whether the "+" button should be disabled per item in Cart Drawer
   const itemRemainingStock = (id) => {
     const prod = products.find((p) => p.id === id);
     return prod?.stock ?? 0;
   };
 
   return (
-    <BrowserRouter>
-      {/* Root style wrapper: expose CSS vars + font */}
-      <div
-        style={{
-          "--brand": branding.primaryColor,
-          "--accent": branding.accentColor,
-          "--text": branding.textColor,
-          fontFamily: branding.fontFamily || "Inter",
-          color: "var(--text)",
-        }}
-      >
-        {/* Header */}
-        <header className="fixed inset-x-0 top-0 z-50 bg-white text-black shadow">
-          <div className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
-            <div className="h-16 flex items-center justify-start gap-x-4 md:gap-x-8">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-wide whitespace-nowrap">
-                <Link to="/">{branding.siteTitle}</Link>
-              </h1>
+    <div
+      style={{
+        "--brand": branding.primaryColor,
+        "--accent": branding.accentColor,
+        "--text": branding.textColor,
+        fontFamily: branding.fontFamily || "Inter",
+        color: "var(--text)",
+      }}
+    >
+      {/* Header */}
+      <header className="fixed inset-x-0 top-0 z-50 bg-white text-black shadow">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
+          <div className="h-16 flex items-center justify-start gap-x-4 md:gap-x-8">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-wide whitespace-nowrap">
+              <Link to="/">{branding.siteTitle}</Link>
+            </h1>
 
-              <nav className="hidden md:flex items-center gap-6 text-base md:text-lg whitespace-nowrap">
-                <Link className="hover:underline" to="/">HOME</Link>
-                <Link className="hover:underline" to="/earrings">EARRINGS</Link>
-                <Link className="hover:underline" to="/about">ABOUT</Link>
-                <Link className="hover:underline" to="/contact">CONTACT</Link>
-                {IS_OWNER && (
-                  <Link className="hover:underline" to="/reports" title="Reports">
-                    REPORTS
-                  </Link>
-                )}
-              </nav>
+            <nav className="hidden md:flex items-center gap-6 text-base md:text-lg whitespace-nowrap">
+              <Link className="hover:underline" to="/">HOME</Link>
+              <Link className="hover:underline" to="/earrings">EARRINGS</Link>
+              <Link className="hover:underline" to="/about">ABOUT</Link>
+              <Link className="hover:underline" to="/contact">CONTACT</Link>
+              {IS_OWNER && (
+                <Link className="hover:underline" to="/reports" title="Reports">
+                  REPORTS
+                </Link>
+              )}
+            </nav>
 
-              <div className="ml-auto flex items-center gap-3">
-                {/* Settings (owner only) */}
-                {IS_OWNER && (
-                  <button
-                    type="button"
-                    onClick={() => setSettingsOpen(true)}
-                    className="hidden sm:inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-black/5"
-                    title="Site Settings"
-                    aria-label="Open site settings"
-                  >
-                    <FaCog /> Settings
-                  </button>
-                )}
-
-                {/* Admin add product (owner only) */}
-                {IS_OWNER && (
-                  <button
-                    type="button"
-                    onClick={() => { setEditProduct(null); setAdminOpen(true); }}
-                    className="hidden sm:inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-black/5"
-                    title="Admin: Add product"
-                    aria-label="Add product"
-                  >
-                    <FaPlus /> Add Product
-                  </button>
-                )}
-
-                {/* Wishlist button with badge */}
+            <div className="ml-auto flex items-center gap-3">
+              {IS_OWNER && (
                 <button
                   type="button"
-                  onClick={() => setWishlistOpen(true)}
-                  className="relative bg-white p-1 rounded-full shadow hover:bg-pink-100 transition"
-                  title="Wishlist"
-                  aria-label="Open wishlist"
+                  onClick={() => setSettingsOpen(true)}
+                  className="hidden sm:inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-black/5"
+                  title="Site Settings"
+                  aria-label="Open site settings"
                 >
-                  <FaHeart size={18} className="text-gray-500 hover:text-red-500" />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-pink-500 text-white text-xs flex items-center justify-center">
-                      {wishlistCount}
-                    </span>
-                  )}
+                  <FaCog /> Settings
                 </button>
+              )}
 
-                {/* Cart */}
+              {IS_OWNER && (
                 <button
                   type="button"
-                  onClick={() => setCartOpen(true)}
-                  className="relative bg-white p-1 rounded-full shadow hover:bg-[var(--accent)]/20 transition"
-                  title="Open cart"
-                  aria-label="Open cart"
+                  onClick={() => { setEditProduct(null); setAdminOpen(true); }}
+                  className="hidden sm:inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-black/5"
+                  title="Admin: Add product"
+                  aria-label="Add product"
                 >
-                  <FaShoppingCart size={18} className="text-gray-500 hover:text-[var(--accent)]" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
+                  <FaPlus /> Add Product
                 </button>
+              )}
 
-                {/* Auth */}
-                <button
-                  type="button"
-                  onClick={() => setShowAuth(true)}
-                  className="bg-white p-1 rounded-full shadow hover:bg-[var(--brand)]/20 transition"
-                  title={sessionEmail ? `Signed in: ${sessionEmail}` : "Sign in / Sign up"}
-                  aria-label="Sign in or sign up"
-                >
-                  <FaUser size={18} className="text-gray-500 hover:text-[var(--brand)]" />
-                </button>
-
-                {/* Show Sign Out only when signed in */}
-                {sessionEmail && (
-                  <button
-                    type="button"
-                    onClick={() => { localStorage.removeItem("session"); window.location.reload(); }}
-                    className="bg-white p-1 rounded-full shadow hover:bg-gray-100 transition"
-                    aria-label="Sign out"
-                  >
-                    Sign Out
-                  </button>
+              <button
+                type="button"
+                onClick={() => setWishlistOpen(true)}
+                className="relative bg-white p-1 rounded-full shadow hover:bg-pink-100 transition"
+                title="Wishlist"
+                aria-label="Open wishlist"
+              >
+                <FaHeart size={18} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-pink-500 text-white text-xs flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
                 )}
-              </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCartOpen(true)}
+                className="relative bg-white p-1 rounded-full shadow hover:bg-[var(--accent)]/20 transition"
+                title="Open cart"
+                aria-label="Open cart"
+              >
+                <FaShoppingCart size={18} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAuth(true)}
+                className="bg-white p-1 rounded-full shadow hover:bg-[var(--brand)]/20 transition"
+                title={sessionEmail ? `Signed in: ${sessionEmail}` : "Sign in / Sign up"}
+                aria-label="Sign in or sign up"
+              >
+                <FaUser size={18} />
+              </button>
+
+              {sessionEmail && (
+                <button
+                  type="button"
+                  onClick={() => { localStorage.removeItem("session"); window.location.reload(); }}
+                  className="bg-white p-1 rounded-full shadow hover:bg-gray-100 transition"
+                  aria-label="Sign out"
+                >
+                  Sign Out
+                </button>
+              )}
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Search bar (shared) */}
-        <section className="pt-20 mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
-          <form
-            onSubmit={(e) => { e.preventDefault(); /* filtering happens automatically via state */ }}
-            className="flex max-w-xl gap-2 mb-4"
-          >
-            <div className="relative w-full">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">🔍</span>
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search earrings by title or badge…"
-                aria-label="Search products"
-                className="w-full rounded px-3 py-2 pl-10 border-0 focus:outline-none focus:ring-0 bg-white"
+      {/* Search */}
+      <section className="pt-20 mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
+        <form onSubmit={(e) => e.preventDefault()} className="flex max-w-xl gap-2 mb-4">
+          <div className="relative w-full">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">🔍</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search earrings by title or badge…"
+              aria-label="Search products"
+              className="w-full rounded px-3 py-2 pl-10 border-0 focus:outline-none focus:ring-0 bg-white"
+            />
+          </div>
+        </form>
+      </section>
+
+      {/* PAGES */}
+      <Suspense fallback={<div className="px-4 md:px-6 lg:px-8 pt-10">Loading…</div>}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomeSection
+                products={products}
+                addToCart={addToCart}
+                addToWishlist={addToWishlist}
+                IS_OWNER={IS_OWNER}
+                setEditProduct={setEditProduct}
+                setAdminOpen={setAdminOpen}
+                deleteProduct={deleteProduct}
+                branding={branding}
               />
-            </div>
-          </form>
-        </section>
+            }
+          />
+          <Route
+            path="/earrings"
+            element={
+              <EarringsPage
+                products={filteredProducts}
+                addToCart={addToCart}
+                addToWishlist={addToWishlist}
+                IS_OWNER={IS_OWNER}
+                setEditProduct={setEditProduct}
+                setAdminOpen={setAdminOpen}
+                deleteProduct={deleteProduct}
+              />
+            }
+          />
+          <Route
+            path="/about"
+            element={<About data={aboutData} canEdit={IS_OWNER} onEdit={() => setEditSection("about")} />}
+          />
+          <Route
+            path="/contact"
+            element={<Contact data={contactData} canEdit={IS_OWNER} onEdit={() => setEditSection("contact")} />}
+          />
 
-        {/* PAGES */}
-        <Suspense fallback={<div className="px-4 md:px-6 lg:px-8 pt-10">Loading…</div>}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomeSection
-                  products={products}
-                  addToCart={addToCart}
-                  addToWishlist={addToWishlist}
-                  IS_OWNER={IS_OWNER}
-                  setEditProduct={setEditProduct}
-                  setAdminOpen={setAdminOpen}
-                  deleteProduct={deleteProduct}
-                  branding={branding}
-                />
-              }
-            />
-            <Route
-              path="/earrings"
-              element={
-                <EarringsPage
-                  products={filteredProducts}
-                  addToCart={addToCart}
-                  addToWishlist={addToWishlist}
-                  IS_OWNER={IS_OWNER}
-                  setEditProduct={setEditProduct}
-                  setAdminOpen={setAdminOpen}
-                  deleteProduct={deleteProduct}
-                />
-              }
-            />
+          <Route
+            path="/reports"
+            element={
+              <PrivateRoute isAllowed={IS_OWNER}>
+                <ReportsPage orders={orders} events={events} products={products} />
+              </PrivateRoute>
+            }
+          />
 
-            <Route
-              path="/about"
-              element={
-                <About
-                  data={aboutData}
-                  canEdit={IS_OWNER}
-                  onEdit={() => setEditSection("about")}
-                />
-              }
-            />
-            <Route
-              path="/contact"
-              element={
-                <Contact
-                  data={contactData}
-                  canEdit={IS_OWNER}
-                  onEdit={() => setEditSection("contact")}
-                />
-              }
-            />
+          {/* Fallback so you never get a blank screen */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
 
-            {/* OWNER-ONLY REPORTS */}
-            <Route
-              path="/reports"
-              element={
-                <PrivateRoute isAllowed={IS_OWNER}>
-                  <ReportsPage orders={orders} events={events} products={products} />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </Suspense>
+      {/* Cart Drawer */}
+      <div className={`fixed inset-0 z-[55] ${cartOpen ? "" : "pointer-events-none"}`}>
+        <div className={`absolute inset-0 bg-black/40 transition-opacity ${cartOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setCartOpen(false)} />
+        <aside className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col transition-transform duration-300 ${cartOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="text-lg font-semibold">Your Cart</h3>
+            <button onClick={() => setCartOpen(false)} className="rounded-lg border px-3 py-1 hover:bg-black/5">Close</button>
+          </div>
 
-        {/* Cart Drawer */}
-        <div className={`fixed inset-0 z-[55] ${cartOpen ? "" : "pointer-events-none"}`}>
-          <div className={`absolute inset-0 bg-black/40 transition-opacity ${cartOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setCartOpen(false)} />
-          <aside className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col transition-transform duration-300 ${cartOpen ? "translate-x-0" : "translate-x-full"}`}>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Your Cart</h3>
-              <button onClick={() => setCartOpen(false)} className="rounded-lg border px-3 py-1 hover:bg-black/5">Close</button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {cart.length === 0 && <p className="text-gray-600">Your cart is empty.</p>}
-              {cart.map((item) => {
-                const remaining = itemRemainingStock(item.id);
-                return (
-                  <div key={item.id} className="flex gap-3 border rounded-lg p-2">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="size-20 object-cover rounded"
-                      loading="lazy"
-                      decoding="async"
-                      width="80"
-                      height="80"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-gray-600">{money(item.price_cents)}</p>
-                        </div>
-                        <button onClick={() => removeFromCart(item.id)} className="text-red-600 hover:text-red-700 p-1" title="Remove" aria-label="Remove from cart">
-                          <FaTrash />
-                        </button>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {cart.length === 0 && <p className="text-gray-600">Your cart is empty.</p>}
+            {cart.map((item) => {
+              const remaining = itemRemainingStock(item.id);
+              return (
+                <div key={item.id} className="flex gap-3 border rounded-lg p-2">
+                  <img src={item.image} alt={item.title} className="size-20 object-cover rounded" loading="lazy" decoding="async" width="80" height="80" />
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium">{item.title}</p>
+                        <p className="text-sm text-gray-600">{money(item.price_cents)}</p>
                       </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <button onClick={() => dec(item.id)} className="rounded border px-2 py-1 hover:bg-black/5" aria-label="Decrease quantity">-</button>
-                        <span className="min-w-8 text-center">{item.qty}</span>
-                        <button
-                          onClick={() => { if (remaining > 0) inc(item.id); }}
-                          className={`rounded border px-2 py-1 ${remaining > 0 ? "hover:bg-black/5" : "opacity-50 cursor-not-allowed"}`}
-                          disabled={remaining <= 0}
-                          aria-label={remaining > 0 ? "Increase quantity" : "No more stock"}
-                          title={remaining > 0 ? "Increase quantity" : "No more stock"}
-                        >
-                          +
-                        </button>
-                      </div>
+                      <button onClick={() => removeFromCart(item.id)} className="text-red-600 hover:text-red-700 p-1" title="Remove" aria-label="Remove from cart">
+                        <FaTrash />
+                      </button>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <button onClick={() => dec(item.id)} className="rounded border px-2 py-1 hover:bg-black/5" aria-label="Decrease quantity">-</button>
+                      <span className="min-w-8 text-center">{item.qty}</span>
+                      <button
+                        onClick={() => { if (remaining > 0) inc(item.id); }}
+                        className={`rounded border px-2 py-1 ${remaining > 0 ? "hover:bg-black/5" : "opacity-50 cursor-not-allowed"}`}
+                        disabled={remaining <= 0}
+                        aria-label={remaining > 0 ? "Increase quantity" : "No more stock"}
+                        title={remaining > 0 ? "Increase quantity" : "No more stock"}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
+          </div>
 
-            <div className="border-t p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Subtotal</span>
-                <span className="font-semibold">{money(subtotal)}</span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={clearCart} className="flex-1 rounded-lg border px-4 py-2 hover:bg-black/5">Clear Cart</button>
-                <button onClick={checkout} className="flex-1 rounded-lg bg-[var(--accent)] px-4 py-2 font-medium text-white hover:opacity-90">
-                  Checkout
+          <div className="border-t p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Subtotal</span>
+              <span className="font-semibold">{money(subtotal)}</span>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={clearCart} className="flex-1 rounded-lg border px-4 py-2 hover:bg-black/5">Clear Cart</button>
+              <button onClick={checkout} className="flex-1 rounded-lg bg-[var(--accent)] px-4 py-2 font-medium text-white hover:opacity-90">
+                Checkout
+              </button>
+            </div>
+            <p className="text-xs text-gray-500">(Demo checkout happens on this page—no navigation.)</p>
+          </div>
+        </aside>
+      </div>
+
+      {/* Wishlist Drawer */}
+      <div className={`fixed inset-0 z-[55] ${wishlistOpen ? "" : "pointer-events-none"}`}>
+        <div className={`absolute inset-0 bg-black/40 transition-opacity ${wishlistOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setWishlistOpen(false)} />
+        <aside className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col transition-transform duration-300 ${wishlistOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="text-lg font-semibold">Your Wishlist</h3>
+            <button onClick={() => setWishlistOpen(false)} className="rounded-lg border px-3 py-1 hover:bg-black/5">Close</button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {wishlist.length === 0 && <p className="text-gray-600">Your wishlist is empty.</p>}
+            {wishlist.map((item) => (
+              <div key={item.id} className="flex gap-3 border rounded-lg p-2">
+                <img src={item.image} alt={item.title} className="size-20 object-cover rounded" loading="lazy" decoding="async" width="80" height="80" />
+                <div className="flex-1">
+                  <p className="font-medium">{item.title}</p>
+                  <p className="text-sm text-gray-600">{money(item.price_cents)}</p>
+                </div>
+                <button onClick={() => removeFromWishlist(item.id)} className="text-red-600 hover:text-red-700 p-1" title="Remove" aria-label="Remove from wishlist">
+                  <FaTrash />
                 </button>
               </div>
-              <p className="text-xs text-gray-500">(Demo checkout happens on this page—no navigation.)</p>
-            </div>
-          </aside>
-        </div>
-
-        {/* Wishlist Drawer */}
-        <div className={`fixed inset-0 z-[55] ${wishlistOpen ? "" : "pointer-events-none"}`}>
-          <div
-            className={`absolute inset-0 bg-black/40 transition-opacity ${wishlistOpen ? "opacity-100" : "opacity-0"}`}
-            onClick={() => setWishlistOpen(false)}
-          />
-          <aside className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col transition-transform duration-300 ${wishlistOpen ? "translate-x-0" : "translate-x-full"}`}>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Your Wishlist</h3>
-              <button onClick={() => setWishlistOpen(false)} className="rounded-lg border px-3 py-1 hover:bg-black/5">Close</button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {wishlist.length === 0 && <p className="text-gray-600">Your wishlist is empty.</p>}
-              {wishlist.map((item) => (
-                <div key={item.id} className="flex gap-3 border rounded-lg p-2">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="size-20 object-cover rounded"
-                    loading="lazy"
-                    decoding="async"
-                    width="80"
-                    height="80"
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-gray-600">{money(item.price_cents)}</p>
-                  </div>
-                  <button onClick={() => removeFromWishlist(item.id)} className="text-red-600 hover:text-red-700 p-1" title="Remove" aria-label="Remove from wishlist">
-                    <FaTrash />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </aside>
-        </div>
-
-        {/* Modals */}
-        <AuthoModal open={showAuth} onClose={() => setShowAuth(false)} />
-        <AdminProductModal
-          open={IS_OWNER && adminOpen}
-          initial={editProduct}
-          onClose={() => { setAdminOpen(false); setEditProduct(null); }}
-          onSave={handleSaveProduct}
-        />
-        <SettingsModal
-          open={IS_OWNER && settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          branding={branding}
-          setBranding={setBranding}
-          resetBranding={resetBranding}
-        />
-
-        {/* About/Contact editor */}
-        <EditSectionModal
-          open={IS_OWNER && !!editSection}
-          type={editSection || undefined}
-          initial={editSection === "about" ? aboutData : editSection === "contact" ? contactData : null}
-          onClose={() => setEditSection(null)}
-          onSave={(data) => {
-            if (editSection === "about") setAboutData(data);
-            if (editSection === "contact") setContactData(data);
-          }}
-        />
+            ))}
+          </div>
+        </aside>
       </div>
-    </BrowserRouter>
+
+      {/* Modals */}
+      <AuthoModal open={showAuth} onClose={() => setShowAuth(false)} />
+      <AdminProductModal
+        open={IS_OWNER && adminOpen}
+        initial={editProduct}
+        onClose={() => { setAdminOpen(false); setEditProduct(null); }}
+        onSave={handleSaveProduct}
+      />
+      <SettingsModal
+        open={IS_OWNER && settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        branding={branding}
+        setBranding={setBranding}
+        resetBranding={resetBranding}
+      />
+      <EditSectionModal
+        open={IS_OWNER && !!editSection}
+        type={editSection || undefined}
+        initial={editSection === "about" ? aboutData : editSection === "contact" ? contactData : null}
+        onClose={() => setEditSection(null)}
+        onSave={(data) => {
+          if (editSection === "about") setAboutData(data);
+          if (editSection === "contact") setContactData(data);
+        }}
+      />
+    </div>
   );
 }
