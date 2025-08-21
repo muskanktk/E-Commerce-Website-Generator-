@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart, FaUser, FaTrash, FaEdit, FaPlus, FaCog } from "react-icons/fa";
 
 const About = lazy(() => import("./About"));
@@ -700,6 +700,9 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const DEFAULT_ABOUT = {
     title: "About Us",
     body: "Write about your brand, story, materials, and care instructions.",
@@ -885,28 +888,33 @@ export default function App() {
 
   const logEvent = (evt) => setEvents((prev) => [...prev, { ts: Date.now(), ...evt }]);
 
-  const checkout = () => {
-    if (cart.length === 0) return;
-    const order = {
-      id: `o-${Date.now()}`,
-      ts: Date.now(),
-      items: cart.map(({ id, title, price_cents, qty }) => ({ id, title, price_cents, qty })),
-      subtotal_cents: cart.reduce((s, i) => s + (i.price_cents || 0) * (i.qty || 0), 0),
-    };
-    setOrders((prev) => [order, ...prev]);
-    logEvent({ type: "checkout", orderId: order.id, total_cents: order.subtotal_cents, items: order.items.length });
-    setCart([]);
-    setCartOpen(false);
-    alert("Order placed! (demo)");
-  };
+  // ---- smarter, name-only search (normalize + token match) ----
+  const normalize = (s = "") =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
   const filteredProducts = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalize(query);
     if (!q) return products;
-    return products.filter(p =>
-      [p.title, p.badge].filter(Boolean).some(s => s.toLowerCase().includes(q))
-    );
+    const tokens = q.split(" ");
+    return products.filter((p) => {
+      const title = normalize(p.title || "");
+      return tokens.every((tok) => title.includes(tok));
+    });
   }, [products, query]);
+
+  // auto-navigate to /earrings when searching
+  useEffect(() => {
+    const q = query.trim();
+    if (q && location.pathname !== "/earrings") {
+      navigate("/earrings");
+    }
+  }, [query, location.pathname, navigate]);
 
   const itemRemainingStock = (id) => {
     const prod = products.find((p) => p.id === id);
@@ -1032,7 +1040,7 @@ export default function App() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search earrings by title or badge…"
+              placeholder="Search earrings by name…"
               aria-label="Search products"
               className="w-full rounded px-3 py-2 pl-10 border-0 focus:outline-none focus:ring-0 bg-white"
             />
