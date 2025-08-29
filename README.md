@@ -131,7 +131,3 @@ Pull requests are welcome. Please open an issue for major changes first.
 ## License
 
 MIT License – see [LICENSE](LICENSE) for details.
-
----
-
-👉 Do you want me to make this README **generic** (no tech stack locked in, since you didn’t say whether you built it in Node, Django, etc.), or should I tailor it specifically to the stack you used for your E-Commerce site?
